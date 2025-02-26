@@ -48,6 +48,22 @@ Some ethical conerns include privacy as each user's data should be protected and
 
 Another conern is potential bias in the data and model as the model may react differently to different groups of people and types of eyes. We expect that the model may have different error rates for different sub-groups in the data. For example, the model may have a higher error rate for people with darker skin tones, smaller eyes, or people with glasses. We would mitigate this by ensuring that our data is diverse and representative of types of eyes and the model reacts the same to different people. Our diverse team of three will ensure that our model is not biased and that we are able to handle any appeals or mistakes that may arise through having diverse testing data.
 
+
+
+## Updated Ethical Sweep:
+
+Our project aims to develop a neural network that can track a user's eye movement and classify their gaze direction and eye status.  This project is impactful to innovate within the way how users can interact with hardware and could improve accessiblity of tasks to user with disabilites. However, here are several ethical considerations that must be addressed when developing and deploying this technology. Key concerns include privacy, bias, accessibility, security, and transparency.
+
+Privacy is a primary concern, as gaze-tracking technology involves collecting and analyzing sensitive biometric data. To protect user information, we will implement data anonymization protocols to ensure that personally identifiable information is never retained. Users will be fully informed about how their data is collected, used, and stored, with explicit consent obtained before any data collection. Additionally, users will have the ability to opt out and request data deletion at any time, ensuring control over their personal information.
+
+Bias in model training is crucial to ensuring that our system performs reliably for all users. Research has shown that many gaze-estimation models have higher error rates for people with darker skin tones, smaller eyes, or those who wear glasses. To mitigate this, we will use a diverse dataset that represents various ethnic backgrounds, eye structures, lighting conditions, and head positions. We will continuously evaluate model performance across demographic groups and apply different machine learning techniques to reduce disparities in accuracy.
+
+Security risks and potential misuse must also be carefully considered. Gaze-tracking technology could be exploited for unauthorized surveillance or data collection if not properly restricted. To prevent this, we will design our system with clear safeguards, ensuring that gaze-based tracking is limited to assistive applications with explicit user consent. Moreover, data access will be restricted.
+
+Finally, transparency in deployment is critical to building trust for technology. Many machine learning models make their decision-making process difficult to interpret. To address this, we will document how our model functions and provide explanations for its classifications.
+
+ Our goal is not only to develop an effective solution but to do so in a way that is ethical, inclusive, and beneficial to those who need it most.
+
 ## Project Goals
 
 1. **Create a dataset** containing images from multiple individuals, capturing different gaze directions and eye statuses under varied conditions.  
