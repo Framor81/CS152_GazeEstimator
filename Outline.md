@@ -3,14 +3,13 @@
 
 # Introduction
 ## Introductory sentence
-Approximately 12.2% of Americans experience mobility disabilities, often requiring lifelong assistance [1]. These individulas have lost a great degree of their independence and individualism, and in order to regain that have to rely on technologyh. However, much of the world's current assistive technologies, like joystick-controlled wheelchairs or voice-command systems, pose limitations for individuals with limited dexterity [2].
+Approximately 12.2% of Americans experience mobility disabilities, often requiring lifelong assistance [1]. These individuals face significant challenges in maintaining independence and autonomy, frequently relying on assistive technologies to regain control over their environment. However, many existing technologies, such as joystick-controlled wheelchairs or voice-command systems, are limited for individuals with restricted dexterity [2].
 
 ## Supporting paragraphs (e.g., citation or quote)
 
- Eye-tracking offers an alternative control system, which allows for mobility without external limb movement. However, existing eye-tracking solutions often require expensive equipment like commercial eye-trackers or infrared cameras [5]. Luckily, CNNs yip yap about CNNS and how we can use them [4 and 3] alongside innovative approach from [6].
-
+Eye tracking presents a promising alternative, enabling individuals to navigate and interact with their surroundings without the need for external limb movement. However, current solutions often rely on overly expensive commercial eye-trackers or infrared cameras, which are inaccessible to many users [5]. We believe that convolutional Neural Networks (CNNs) offer an opportunity to enhance affordability and accessibility by utilizing computer vision techniques for gaze estimation [3]. Recent works show that deep learning methods can improve gaze estimation accuracy, even in challenging conditions [4]. Additionally, by integrating innovative approaches like a sliding window-based attention mechanism, we could enhance the adaptability and precision of gaze-based control systems [6].
 ## Thesis
-Our research aims to develop an affordable and accurate gaze estimator by leveraging neural networks trained on a diverse population to allow for high-accuracy between a diverse set of individuals, correctly identify general directions for user's gaze, and map the estimated gaze to a set of coordinates that will then idenitfy a user's current gaze on a screen.
+Our research aims to develop an affordable and accurate gaze estimator using neural networks trained on a diverse population. The system is designed to have high accuracy across a wide range of demographics, correctly identify gaze directions, and map the estimated gaze to a set of coordinates that determine the user’s focus on a screen. By integrating CNN-based techniques and the attention mechanisms described, we seek to improve the accuracy, affordability, and accessibility of gaze-based control systems.
 
 # First body section
 ## Topic related to first point of thesis
