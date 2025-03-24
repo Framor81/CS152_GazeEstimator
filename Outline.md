@@ -2,39 +2,32 @@
 ## Group Members: Francisco Morales Puente, Luis Mendoza, Haram Yoon
 
 # Introduction
-## Introductory sentence
-Approximately 12.2% of Americans experience mobility disabilities, often requiring lifelong assistance [1]. These individuals face significant challenges in maintaining independence and autonomy, frequently relying on assistive technologies to regain control over their environment. However, many existing technologies, such as joystick-controlled wheelchairs or voice-command systems, are limited for individuals with restricted dexterity [2].
 
-## Supporting paragraphs (e.g., citation or quote)
+Approximately 12.2% of Americans experience mobility disabilities, often requiring lifelong assistance [^1]. These individuals face significant challenges in maintaining independence and autonomy, frequently relying on assistive technologies to regain control over their environment. However, many existing technologies, such as joystick-controlled wheelchairs or voice-command systems, are limited for individuals with restricted dexterity [^2].
 
 Eye tracking presents a promising alternative, enabling individuals to navigate and interact with their surroundings without the need for external limb movement. However, current solutions often rely on overly expensive commercial eye-trackers or infrared cameras, which are inaccessible to many users [5]. We believe that convolutional Neural Networks (CNNs) offer an opportunity to enhance affordability and accessibility by utilizing computer vision techniques for gaze estimation [3]. Recent works show that deep learning methods can improve gaze estimation accuracy, even in challenging conditions [4]. Additionally, by integrating innovative approaches like a sliding window-based attention mechanism, we could enhance the adaptability and precision of gaze-based control systems [6].
-## Thesis
+
 Our research aims to develop an affordable and accurate gaze estimator using neural networks trained on a diverse population. The system is designed to have high accuracy across a wide range of demographics, correctly identify gaze directions, and map the estimated gaze to a set of coordinates that determine the user’s focus on a screen. By integrating CNN-based techniques and the attention mechanisms described, we seek to improve the accuracy, affordability, and accessibility of gaze-based control systems.
 
-# First body section
-## Topic related to first point of thesis
-## Supporting paragraphs
+# Remaining Sections
 
-# Second body section
-## Topic related to second point of thesis
-## Supporting paragraphs
+- Ethical Sweep
+    - Purpose of Section: In this section, we'll examine the ethical considerations surrounding our work, including data privacy, accessibility, algorithmic bias, and the implications of deploying assistive technologies to vulnerable populations.
+    - To be added soon
 
-# Third body section
-## Topic related to third point of thesis
-## Supporting paragraphs
+- Related Work
+    - Purpose of Section: In this section, we'll contextualize our project within the broader field of gaze estimation and assistive robotics by discussing prior research efforts and highlighting how our approach builds upon and differs from these previous works.
+
+- Supporting Paragraphs
+    - Purpose of Section: In this section, we'll expand on our thesis by providing technical information. We will talk about our methods, our considerations, and findings. 
 
 # Conclusion
-## Restated thesis
 Our research demonstrates that eye-tracking can serve as a cost-effective and accessible alternative for mobility assistance. By leveraging neural networks trained on a diverse population, we aim to improve gaze estimation accuracy across different individuals, enables precise gaze direction estimation, and even allows for coordinate mapping; laying the foundation for broader applications in assistive technology.
 
-## Highlighted points
 We anticipate that our research will yield several key outcomes and insights. Our approach focuses on developing a convolutional neural network capable of classifying gaze direction (forward, left, right, up, down) and eye status (blinking/open) with a sastisfactory target accuracy using standard webcams rather than specialized hardware. This would validate our approach of making assistive technology more accessible and affordable. After curating a diverse dataset collection process, we will use this diverse data in order to ensure the model performs consistently across various eye structures, lighting conditions, and head positions. We expect the solution to achieve real-time responsiveness, making it viable for practical mobility assistance applications, even with limited computational resources. Finally, we hypothesize that the preprocessing and normalization techniques we implement will be crucial for achieving high accuracy without specialized equipment in order to show effective eye-tracking doesn't necessarily require expensive hardware.
-
-
 
 # Future work and additional questions
 Future work will focus on integrating this model with a robotic system that facilitates real-time control through two-way SSH communication. This setup, combining a laptop, webcam, and Jetson Nano-powered robot, will allow users to navigate and interact with their environment using only their gaze, further expanding accessibility for individuals with mobility impairments. Additional research directions may include personalizing the model for individual users through adaptive calibration techniques, expanding the control interface to include more complex commands through combined eye movements, and implementing the system on mobile platforms to provide greater flexibility. Another future direction we could explore is the integration of multimodal inputs, such as voice commands or facial expressions, to enhance the system's capabilities and user experience. Finally, we could conduct comprehensive user studies with individuals who have mobility disabilities to see our effective approach is within real-world usage and gain valuable feedback.
-
 
 # References:
 [1] “Disability impacts all of us infographic,” Centers for Disease Control and Prevention, https://www.cdc.gov/disability-and-health/articles-documents/disability-impacts-all-of-us-infographic.html?CDC_AAref_Val=https%3A%2F%2Fwww.cdc.gov%2Fncbddd%2Fdisabilityandhealth%2Finfographic-disability-impacts-all.html (accessed Mar. 4, 2025). 
