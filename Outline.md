@@ -15,9 +15,6 @@ Our research aims to develop an affordable and accurate gaze estimator using neu
     - Purpose of Section: In this section, we'll examine the ethical considerations surrounding our work, including data privacy, accessibility, algorithmic bias, and the implications of deploying assistive technologies to vulnerable populations.
     - To be added soon
 
-- Related Work
-    - Purpose of Section: In this section, we'll contextualize our project within the broader field of gaze estimation and assistive robotics by discussing prior research efforts and highlighting how our approach builds upon and differs from these previous works.
-
 - Supporting Paragraphs
     - Purpose of Section: In this section, we'll expand on our thesis by providing technical information. We will talk about our methods, our considerations, and findings. 
 
