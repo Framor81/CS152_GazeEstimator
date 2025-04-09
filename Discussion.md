@@ -38,7 +38,7 @@ Our research aims to develop an affordable and accurate gaze estimator using neu
 
 4. Luis worked on training a custom CNN and ResNet18 using the 5 directions dataset and comparing their accuracies and loss plots. Although the dataset is decently large, it only consists of 12 participants which could potentially cause our models to overfit as seen by the strange loss plots and suspiciously high validation accuracies.
 
-3. Haram worked on developing the gradio interface that utilizes the eyebounding file to track a user's eye movements through a webcam feed. The gradio interface will allow users to see their eye movements in real-time and allow for a simple way to test the gaze estimation model.
+
 
 # Conclusion
 Our research demonstrates that eye-tracking can serve as a cost-effective and accessible alternative for mobility assistance. By leveraging neural networks trained on a diverse population, we aim to improve gaze estimation accuracy across different individuals, enables precise gaze direction estimation, and even allows for coordinate mapping; laying the foundation for broader applications in assistive technology.
