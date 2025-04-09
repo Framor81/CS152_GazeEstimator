@@ -24,6 +24,21 @@ Our research aims to develop an affordable and accurate gaze estimator using neu
 6. Possible pitfalls might include data being biased for certain individuals or ethnic backgrounds and having a harder time for certain types of eyes. Moreover, it is entirely possible that we might also run into hardware related issues where the small scale robot that we intend to use is unable to properly run.
 
 7. We hope to finish off by creating a small demo webpage where people can try controlling the robot themselves.    
+
+
+# Discussion 
+
+1. Francisco worked on implementing and creating a swin transformer following along a tutorial [Tutorial Link](https://medium.com/thedeephub/building-swin-transformer-from-scratch-using-pytorch-hierarchical-vision-transformer-using-shifted-91cbf6abc678)
+
+2. We combined two datasets: one consisting of open eyes facing in one of 5 directions - left, right, down, up, and straight - and another dataset that had images of closed eyes. [Eyes Labeled With Direction](https://www.kaggle.com/datasets/imadeddinedjerarda/mrl-eye-dataset) [Closed Eyes](https://www.kaggle.com/datasets/serenaraju/yawn-eye-dataset-new)
+
+
+# Conclusion
+Our research demonstrates that eye-tracking can serve as a cost-effective and accessible alternative for mobility assistance. By leveraging neural networks trained on a diverse population, we aim to improve gaze estimation accuracy across different individuals, enables precise gaze direction estimation, and even allows for coordinate mapping; laying the foundation for broader applications in assistive technology.
+
+We anticipate that our research will yield several key outcomes and insights. Our approach focuses on developing a convolutional neural network capable of classifying gaze direction (forward, left, right, up, down) and eye status (blinking/open) with a sastisfactory target accuracy using standard webcams rather than specialized hardware. This would validate our approach of making assistive technology more accessible and affordable. After curating a diverse dataset collection process, we will use this diverse data in order to ensure the model performs consistently across various eye structures, lighting conditions, and head positions. We expect the solution to achieve real-time responsiveness, making it viable for practical mobility assistance applications, even with limited computational resources. Finally, we hypothesize that the preprocessing and normalization techniques we implement will be crucial for achieving high accuracy without specialized equipment in order to show effective eye-tracking doesn't necessarily require expensive hardware.
+
+
 # References:
 [^1]: “Disability impacts all of us infographic,” Centers for Disease Control and Prevention, https://www.cdc.gov/disability-and-health/articles-documents/disability-impacts-all-of-us-infographic.html?CDC_AAref_Val=https%3A%2F%2Fwww.cdc.gov%2Fncbddd%2Fdisabilityandhealth%2Finfographic-disability-impacts-all.html (accessed Mar. 4, 2025). 
 
