@@ -32,6 +32,7 @@ Our research aims to develop an affordable and accurate gaze estimator using neu
 
 2. We combined two datasets: one consisting of open eyes facing in one of 5 directions - left, right, down, up, and straight - and another dataset that had images of closed eyes. [Eyes Labeled With Direction](https://www.kaggle.com/datasets/imadeddinedjerarda/mrl-eye-dataset) [Closed Eyes](https://www.kaggle.com/datasets/serenaraju/yawn-eye-dataset-new)
 
+3. Haram worked on developing the gradio interface that utilizes the eyebounding file to track a user's eye movements through a webcam feed. The gradio interface will allow users to see their eye movements in real-time and allow for a simple way to test the gaze estimation model.
 
 # Conclusion
 Our research demonstrates that eye-tracking can serve as a cost-effective and accessible alternative for mobility assistance. By leveraging neural networks trained on a diverse population, we aim to improve gaze estimation accuracy across different individuals, enables precise gaze direction estimation, and even allows for coordinate mapping; laying the foundation for broader applications in assistive technology.
