@@ -19,11 +19,13 @@ Our research aims to develop an affordable and accurate gaze estimator using neu
 
 4. We have implemented an existing python file with code that utilizes the pretrained model to detect a user's eyes and isolate them into a smaller window screen which also has a few linear transformations applied to it to uniformly orient all images. This pythoon file was developed in the Summer of 2024 by Francisco as part of his SURP project for Eyes In Motion.
 
-5. Our project will not focus on finding the best classification accuracy possible instead we will want a decent accuracy where it won't inhibit movement controls when sending commands to a small scale robot through a rpc server.
+5. We are training a convolutional neural network using a combination of the two datasets as mentioned above. Transformations like cropping will be applied to images used for training in an effort to improve generalization.
 
-6. Possible pitfalls might include data being biased for certain individuals or ethnic backgrounds and having a harder time for certain types of eyes. Moreover, it is entirely possible that we might also run into hardware related issues where the small scale robot that we intend to use is unable to properly run.
+6. Our project will not focus on finding the best classification accuracy possible instead we will want a decent accuracy where it won't inhibit movement controls when sending commands to a small scale robot through a rpc server.
 
-7. We hope to finish off by creating a small demo webpage where people can try controlling the robot themselves.    
+7. Possible pitfalls might include data being biased for certain individuals or ethnic backgrounds and having a harder time for certain types of eyes. Moreover, it is entirely possible that we might also run into hardware related issues where the small scale robot that we intend to use is unable to properly run.
+
+8. We hope to finish off by creating a small demo webpage where people can try controlling the robot themselves.    
 
 
 # Discussion 
@@ -31,6 +33,8 @@ Our research aims to develop an affordable and accurate gaze estimator using neu
 1. Francisco worked on implementing and creating a swin transformer following along a tutorial [Tutorial Link](https://medium.com/thedeephub/building-swin-transformer-from-scratch-using-pytorch-hierarchical-vision-transformer-using-shifted-91cbf6abc678)
 
 2. We combined two datasets: one consisting of open eyes facing in one of 5 directions - left, right, down, up, and straight - and another dataset that had images of closed eyes. [Eyes Labeled With Direction](https://www.kaggle.com/datasets/imadeddinedjerarda/mrl-eye-dataset) [Closed Eyes](https://www.kaggle.com/datasets/serenaraju/yawn-eye-dataset-new)
+
+3. Luis worked on training a custom CNN and ResNet18 using the 5 directions dataset and comparing their accuracies and loss plots. Although the dataset is decently large, it only consists of 12 participants which could potentially cause our models to overfit as seen by the strange loss plots and suspiciously high validation accuracies.
 
 
 # Conclusion
