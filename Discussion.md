@@ -44,6 +44,8 @@ Our research aims to develop an affordable and accurate gaze estimator using neu
 
 7. I kept running into memory errors for the GPU so I had to reduce the batch size from 5000 to 500 and then even then it was still too big so I had to change it to 128. The accuracy did get a bit worse though. Results were really good with around overall 95% accuracy with the most confusion coming from closed eyes.
 
+8. Haram continued to work on the gradio interface and was able to get it to work with the webcam feed by fixing a couple of bugs how the frames were being processed. He also added a few extra features like a button to take a picture of the user's eye with red landmarks around it to ensure that the script is working accurately.
+
 
 
 # Conclusion

@@ -109,10 +109,9 @@ class EyeTracker:
         return frame
 
     def process_frame(self):
-        """Process a frame to extract eye region without requiring face detection"""
+        """Process a frame to extract eye region with improved accuracy"""
         if not self.is_running or self.cap is None:
             debug_print("Camera not running in process_frame")
-            # Return a test frame instead of None for debugging
             return self.get_test_frame()
 
         try:
@@ -129,13 +128,28 @@ class EyeTracker:
             frame = cv2.flip(frame, 1)
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             
-            # Create artificial face region covering center of frame
-            h, w = gray.shape
-            rect = dlib.rectangle(left=int(w*0.2), top=int(h*0.2), 
-                                 right=int(w*0.8), bottom=int(h*0.8))
+            # Apply histogram equalization to improve contrast in different lighting
+            gray = cv2.equalizeHist(gray)
+            
+            # Auto-detect face if possible, otherwise use artificial region
+            dets = self.detector(gray)
+            if len(dets) > 0:
+                rect = dets[0]  # Use the first detected face
+                debug_print(f"Face detected at: {rect}")
+            else:
+                # Create artificial face region covering center of frame
+                h, w = gray.shape
+                # Make the region better positioned for eyes (slightly above center)
+                rect = dlib.rectangle(
+                    left=int(w*0.2), 
+                    top=int(h*0.2), 
+                    right=int(w*0.8), 
+                    bottom=int(h*0.6)  # Reduced height to focus more on upper face
+                )
+                debug_print(f"Using artificial face region: {rect}")
             
             try:
-                # Detect eyes and centers using the artificial face region
+                # Detect eyes and centers
                 left_eye_points, left_eye_center = facial_landmarks(self.predictor, gray, rect, 36, 42)
                 right_eye_points, right_eye_center = facial_landmarks(self.predictor, gray, rect, 42, 48)
                 debug_print(f"Eye centers detected - Left: {left_eye_center}, Right: {right_eye_center}")
@@ -148,15 +162,19 @@ class EyeTracker:
                 rotated_frame, gray_rotated, _ = orient_eyes(frame, self.detector, eyes_center, angle)
                 
                 # Use original rect for landmark detection on rotated frame
-                rotated_rect = rect  # Use same region in rotated frame
+                rotated_rect = rect
+                
+                # Get eye landmarks in rotated frame
+                left_eye_points_rotated, _ = facial_landmarks(self.predictor, gray_rotated, rotated_rect, 36, 42)
+                right_eye_points_rotated, _ = facial_landmarks(self.predictor, gray_rotated, rotated_rect, 42, 48)
+                eye_points_rotated = np.vstack((left_eye_points_rotated, right_eye_points_rotated))
                 
                 # Crop to fixed bounding box around eyes
                 x_min, y_min, x_max, y_max = calculate_fixed_bounding_box(eyes_center, rotated_frame.shape, WINDOW_SIZE)
-                debug_print(f"Bounding box: ({x_min}, {y_min}) to ({x_max}, {y_max})")
                 
                 # Check for valid crop dimensions
                 if x_min >= x_max or y_min >= y_max or x_min < 0 or y_min < 0 or \
-                   x_max > rotated_frame.shape[1] or y_max > rotated_frame.shape[0]:
+                x_max > rotated_frame.shape[1] or y_max > rotated_frame.shape[0]:
                     debug_print(f"Invalid bounding box dimensions, returning original frame")
                     return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 
@@ -166,11 +184,8 @@ class EyeTracker:
                 # Resize for display
                 resized_frame = cv2.resize(cropped_frame, WINDOW_SIZE)
                 debug_print(f"Frame resized to {WINDOW_SIZE}")
-
-                # Get eye landmarks in rotated frame
-                eye_points_rotated, _ = facial_landmarks(self.predictor, gray_rotated, rotated_rect, 36, 48)
                 
-                # Draw landmarks
+                # Draw landmarks more precisely
                 for (x, y) in eye_points_rotated:
                     # Check if the point is inside the cropped area
                     if x_min <= x < x_max and y_min <= y < y_max:
