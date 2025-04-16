@@ -38,6 +38,12 @@ Our research aims to develop an affordable and accurate gaze estimator using neu
 
 4. Luis worked on training a custom CNN and ResNet18 using the 5 directions dataset and comparing their accuracies and loss plots. Although the dataset is decently large, it only consists of 12 participants which could potentially cause our models to overfit as seen by the strange loss plots and suspiciously high validation accuracies.
 
+5. Francisco then trained the Swin Transformer using the combined dataset. He ran into a few issues however when he was in the process. He was originally following along with the asssignment code and lecture slides; however, when loading our dataloaders I kept getting errors as the previous method only worked with CIFAR and not our own data. Thus, I had to make some minor changes and use the ImageFolder function.
+
+6. Creating the model itself from our Swin class after was not that much harder it was simply calling and instantiating an object of that class  and specifying our layers and number of classes.
+
+7. I kept running into memory errors for the GPU so I had to reduce the batch size from 5000 to 500 and then even then it was still too big so I had to change it to 128. The accuracy did get a bit worse though. Results were really good with around overall 95% accuracy with the most confusion coming from closed eyes.
+
 
 
 # Conclusion
