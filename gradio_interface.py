@@ -182,14 +182,12 @@ class EyeTracker:
         """Return a test frame for debugging"""
         frame = np.zeros((WINDOW_SIZE[1], WINDOW_SIZE[0], 3), dtype=np.uint8)
         frame[:, :] = (255, 0, 0)  # BGR format
-        cv2.putText(frame, "Camera Error", (10, 30), 
+        cv2.putText(frame, "Camera Off", (10, 30), 
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
         return frame
 
     def process_frame(self):
         """Process a single frame"""
-        debug_print(f"Processing frame {self.frame_count}")
-        
         if not self.is_running or self.cap is None:
             debug_print("Camera not running")
             return self.get_test_frame(), "Unknown"
@@ -287,37 +285,54 @@ class EyeTracker:
 debug_print("Creating tracker instance")
 tracker = EyeTracker()
 
+# Global variable to control webcam feed
+webcam_active = False
+
 # For the Gradio interface
 def toggle_camera(is_running):
+    global webcam_active
     debug_print(f"Toggle camera called with is_running={is_running}")
+    
     if not is_running:
         success = tracker.start_camera()
         if success:
+            webcam_active = True  # Set streaming active
+            debug_print("Camera and streaming started")
             return "Stop Camera", True, "Camera running"
         else:
+            webcam_active = False  # Ensure streaming is off
+            debug_print("Failed to start camera")
             return "Start Camera (Failed)", False, "Failed to start camera"
     else:
         tracker.stop_camera()
+        webcam_active = False  # Stop streaming
+        debug_print("Camera and streaming stopped")
         return "Start Camera", False, "Camera stopped"
 
 def update_frame():
     debug_print("Update frame called")
-    frame, gaze = tracker.process_frame()
-    return frame, gaze
+    if tracker.is_running:
+        frame, gaze = tracker.process_frame()
+        return frame, gaze
+    else:
+        return tracker.get_test_frame(), "Camera Off"
 
-def webcam_feed():
-    debug_print("Webcam feed started")
+# We'll use this alternative approach instead of the streaming method
+# since the streaming method isn't being called
+def process_webcam_frame():
+    debug_print("Process webcam frame called")
     try:
-        while True:
-            if tracker.is_running:
-                frame, _ = tracker.process_frame()
-                yield frame
-            else:
-                yield tracker.get_test_frame()
-            time.sleep(0.1)  # 10 FPS
+        if webcam_active and tracker.is_running:
+            frame, gaze = tracker.process_frame()
+            debug_print(f"Frame processed, gaze: {gaze}")
+            return frame, gaze
+        else:
+            test_frame = tracker.get_test_frame()
+            debug_print("Returning test frame (camera off)")
+            return test_frame, "Camera Off"
     except Exception as e:
-        debug_print(f"Error in webcam_feed: {str(e)}")
-        yield tracker.get_test_frame()
+        debug_print(f"Error in process_webcam_frame: {str(e)}")
+        return tracker.get_test_frame(), "Error"
 
 # Create the Gradio interface
 with gr.Blocks(title="Eye Gaze Detection", theme=gr.themes.Base()) as demo:
@@ -333,37 +348,70 @@ with gr.Blocks(title="Eye Gaze Detection", theme=gr.themes.Base()) as demo:
             gaze_text = gr.Textbox(label="Gaze Direction", value="Unknown")
             
         with gr.Column(scale=2):
-            # Version 1: Manual refresh
-            eye_image = gr.Image(label="Eye Region")
-            refresh_btn = gr.Button("Manual Refresh")
+            # Single image component for displaying frames
+            eye_image = gr.Image(label="Eye Region (Live Feed)")
+            debug_print("Created image component")
             
-            # Version 2: Streaming
-            stream_image = gr.Image(label="Streaming Eye Region", streaming=True)
+            # Add a refresh button that will be auto-clicked by JavaScript
+            refresh_btn = gr.Button("Refresh", visible=False, elem_id="refresh-trigger")
     
-    # Connect the buttons to functions
+    # Connect the toggle button to the toggle_camera function
     toggle_btn.click(
         fn=toggle_camera,
         inputs=[camera_state],
         outputs=[toggle_btn, camera_state, status_text]
     )
     
+    # Connect the refresh button to update the frame
     refresh_btn.click(
-        fn=update_frame,
+        fn=process_webcam_frame,
         inputs=[],
         outputs=[eye_image, gaze_text]
     )
     
-    # Set up streaming
-    stream_image.stream(webcam_feed)
-    
-    # Set up timer for gaze text updates
+    # Set up auto-refresh using JavaScript, but controlled by camera state
     demo.load(None, None, None, js="""
         function() {
-            setInterval(function() {
-                if (document.querySelector('button[value="Manual Refresh"]')) {
-                    document.querySelector('button[value="Manual Refresh"]').click();
+            console.log("Setting up event listener for camera toggle");
+            
+            // Global variable to store the interval ID
+            window.refreshInterval = null;
+            
+            // Function to start auto-refresh
+            window.startAutoRefresh = function() {
+                console.log("Starting auto-refresh");
+                if (!window.refreshInterval) {
+                    window.refreshInterval = setInterval(function() {
+                        if (document.getElementById('refresh-trigger')) {
+                            document.getElementById('refresh-trigger').click();
+                            console.log("Auto-clicked refresh button");
+                        }
+                    }, 1000);  // Adjust the interval as needed (500ms)
                 }
-            }, 200);
+            };
+            
+            // Function to stop auto-refresh
+            window.stopAutoRefresh = function() {
+                console.log("Stopping auto-refresh");
+                if (window.refreshInterval) {
+                    clearInterval(window.refreshInterval);
+                    window.refreshInterval = null;
+                }
+            };
+            
+            // Monitor button changes to detect camera toggle
+            setInterval(function() {
+                const button = document.querySelector('button.primary');
+                if (button && button.textContent.includes("Stop Camera")) {
+                    // Camera is on, start auto-refresh if not already running
+                    if (!window.refreshInterval) {
+                        window.startAutoRefresh();
+                    }
+                } else {
+                    // Camera is off, stop auto-refresh
+                    window.stopAutoRefresh();
+                }
+            }, 500);  // Check every 500ms
         }
     """)
     
@@ -373,7 +421,6 @@ with gr.Blocks(title="Eye Gaze Detection", theme=gr.themes.Base()) as demo:
 if __name__ == "__main__":
     debug_print("Launching application...")
     try:
-        
         cv2.setUseOptimized(True)
         cv2.setNumThreads(4)
         
