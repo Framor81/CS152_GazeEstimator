@@ -92,7 +92,7 @@ class EyeTracker:
             # Initialize camera - try different approaches
             if os.name == 'nt':  # Windows
                 debug_print("Trying DirectShow backend on Windows")
-                self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+                self.cap = cv2.VideoCapture(-1, cv2.CAP_DSHOW)
             
             # If camera not opened, try standard approach
             if self.cap is None or not self.cap.isOpened():
@@ -317,8 +317,7 @@ def update_frame():
     else:
         return tracker.get_test_frame(), "Camera Off"
 
-# We'll use this alternative approach instead of the streaming method
-# since the streaming method isn't being called
+
 def process_webcam_frame():
     debug_print("Process webcam frame called")
     try:
