@@ -69,6 +69,7 @@ class EyeTracker:
         self.is_running = False
         self.frame_count = 0
         self.current_gaze = "Unknown"
+        self.current_confidence = 0.0
         self.model = None
         debug_print("EyeTracker initialized")
         
@@ -149,7 +150,7 @@ class EyeTracker:
                 debug_print("Model not loaded, loading now")
                 self.model = load_model()
                 if self.model is None:
-                    return "Model error"
+                    return "Model error", 0.0
             
             # Convert the frame to PIL Image
             pil_image = Image.fromarray(cv2.cvtColor(eye_frame, cv2.COLOR_BGR2RGB))
@@ -162,21 +163,23 @@ class EyeTracker:
                 outputs = self.model(img_tensor)
             
             # Get the predicted class
-            _, predicted = torch.max(outputs, 1)
+            probs = torch.softmax(outputs, dim=1)
+            confidence, predicted = torch.max(probs, 1)
             predicted_idx = predicted.item()
+            confidence_val = confidence.item()
             
             # Ensure the index is valid
             if 0 <= predicted_idx < len(class_names):
                 predicted_class = class_names[predicted_idx]
-                debug_print(f"Predicted class: {predicted_class}")
-                return predicted_class
+                debug_print(f"Predicted class: {predicted_class}, Confidence: {confidence_val:.2f}")
+                return predicted_class, confidence_val
             else:
                 debug_print(f"Invalid prediction index: {predicted_idx}")
-                return "Error"
+                return "Error", 0.0
                 
         except Exception as e:
             debug_print(f"Error in predict_gaze: {str(e)}")
-            return "Error"
+            return "Error", 0.0
     
     def get_test_frame(self):
         """Return a test frame for debugging"""
@@ -262,18 +265,21 @@ class EyeTracker:
                         cv2.circle(resized_frame, (x_adj, y_adj), 2, (0, 0, 255), -1)
             
             # Predict gaze
-            predicted_gaze = self.predict_gaze(resized_frame)
+            predicted_gaze, confidence = self.predict_gaze(resized_frame)
             if predicted_gaze not in ["Error", "Model error"]:
                 self.current_gaze = predicted_gaze
+                self.current_confidence = confidence
             
             # Add text to image
             cv2.putText(resized_frame, f"Gaze: {self.current_gaze}", (10, 15), 
                         cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0), 1)
+            cv2.putText(resized_frame, f"Conf: {self.current_confidence:.2f}", (10, 30), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0), 1)
             
             # Convert to RGB for Gradio
             rgb_frame = cv2.cvtColor(resized_frame, cv2.COLOR_BGR2RGB)
-            debug_print(f"Frame processed, gaze: {self.current_gaze}")
-            return rgb_frame, self.current_gaze
+            debug_print(f"Frame processed, gaze: {self.current_gaze}, confidence: {self.current_confidence:.2f}")
+            return rgb_frame, self.current_gaze, self.current_confidence
             
         except Exception as e:
             debug_print(f"Error in process_frame: {str(e)}")
@@ -312,19 +318,18 @@ def toggle_camera(is_running):
 def update_frame():
     debug_print("Update frame called")
     if tracker.is_running:
-        frame, gaze = tracker.process_frame()
-        return frame, gaze
+        frame, gaze, confidence = tracker.process_frame()
+        return frame, f"{gaze} (Confidence: {confidence:.2f})"
     else:
         return tracker.get_test_frame(), "Camera Off"
-
 
 def process_webcam_frame():
     debug_print("Process webcam frame called")
     try:
         if webcam_active and tracker.is_running:
-            frame, gaze = tracker.process_frame()
-            debug_print(f"Frame processed, gaze: {gaze}")
-            return frame, gaze
+            frame, gaze, confidence = tracker.process_frame()
+            debug_print(f"Frame processed, gaze: {gaze}, confidence: {confidence:.2f}")
+            return frame, f"{gaze} (Confidence: {confidence:.2f})"
         else:
             test_frame = tracker.get_test_frame()
             debug_print("Returning test frame (camera off)")

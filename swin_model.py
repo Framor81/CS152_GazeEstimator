@@ -90,7 +90,7 @@ class ShiftedWindowMSA(nn.Module):
         
         if self.shifted:
             # Apply masks for shifted windows
-            row_mask = torch.zeros((self.window_size**2, self.window_size**2)).cuda()
+            row_mask = torch.zeros((self.window_size**2, self.window_size**2))
             row_mask[-self.window_size * (self.window_size//2):, 0:-self.window_size * (self.window_size//2)] = float('-inf')
             row_mask[0:-self.window_size * (self.window_size//2), -self.window_size * (self.window_size//2):] = float('-inf')
             column_mask = rearrange(row_mask, '(r w1) (c w2) -> (w1 r) (w2 c)', w1=self.window_size, w2=self.window_size)
