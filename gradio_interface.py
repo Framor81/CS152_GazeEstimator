@@ -9,6 +9,39 @@ import torch
 from swin_model import Swin
 import torchvision.transforms as T
 from PIL import Image
+import torch.nn as nn
+
+class EyeCNN(nn.Module):
+    def __init__(self, num_classes=5):
+        super(EyeCNN, self).__init__()
+        self.conv1 = nn.Sequential(
+            nn.Conv2d(3, 16, 3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(2))
+        
+        self.conv2 = nn.Sequential(
+            nn.Conv2d(16, 32, 3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(2))
+
+        self.conv3 = nn.Sequential(
+            nn.Conv2d(32, 64, 3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(2)
+        )
+        self.classifier = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(50176, 128),
+            nn.ReLU(),
+            nn.Dropout(0.3),
+            nn.Linear(128, num_classes)
+        )
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = self.conv3(x)
+        return self.classifier(x)
 
 # Constants
 WINDOW_SIZE = (200, 100)
@@ -36,8 +69,8 @@ def debug_print(message):
 
 debug_print("Debug printing enabled")
 
-# Get class names - make sure they match your model's classes
-class_names = ['closed', 'down', 'left', 'right', 'straight', 'up']
+# Get class names 
+class_names = [ 'down', 'left', 'right', 'straight', 'up']
 
 # Define image transforms for model inference
 transform = T.Compose([
@@ -46,14 +79,29 @@ transform = T.Compose([
     T.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))
 ])
 
-# Load the Swin model
-def load_model():
-    debug_print("Loading Swin Transformer model")
+# Define image transforms for CNN model
+cnn_transform = T.Compose([
+    T.Resize(224),
+    T.ToTensor(),
+    T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+])
+
+#  load_model function
+def load_model(model):
+    debug_print(f"Loading {'CNN' if model == 'CNN' else 'Swin Transformer'} model")
     try:
-        model = Swin()
-        # Modify the output layer to match the number of classes in your trained model
-        model.layer = torch.nn.Linear(768, len(class_names))
-        model.load_state_dict(torch.load("swin_model.pkl", map_location=torch.device('cpu')))
+        if model == "CNN":
+            # Load CNN model
+            model = EyeCNN(num_classes=len(class_names))
+            model.load_state_dict(torch.load("CNN_model.pkl", map_location=torch.device('cpu')))
+        else:
+            class_names.append('closed')
+            # Load Swin Transformer model
+            model = Swin()
+            # Modify the output layer to match the number of classes in your trained model
+            model.layer = torch.nn.Linear(768, len(class_names))
+            model.load_state_dict(torch.load("swin_model.pkl", map_location=torch.device('cpu')))
+        
         model.eval()
         debug_print("Model loaded successfully")
         return model
@@ -75,7 +123,7 @@ class EyeTracker:
         
         # Try to load model on initialization
         try:
-            self.model = load_model()
+            self.model = load_model(model='swin') # CCN vs Swin
         except Exception as e:
             debug_print(f"Failed to load model on init: {str(e)}")
 
@@ -93,7 +141,7 @@ class EyeTracker:
             # Initialize camera - try different approaches
             if os.name == 'nt':  # Windows
                 debug_print("Trying DirectShow backend on Windows")
-                self.cap = cv2.VideoCapture(-1, cv2.CAP_DSHOW)
+                self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
             
             # If camera not opened, try standard approach
             if self.cap is None or not self.cap.isOpened():
@@ -144,19 +192,26 @@ class EyeTracker:
         debug_print("Camera stopped")
 
     def predict_gaze(self, eye_frame):
-        """Predict gaze direction using the Swin model"""
+        """Predict gaze direction using the loaded model"""
         try:
             if self.model is None:
                 debug_print("Model not loaded, loading now")
-                self.model = load_model()
+                self.model = load_model(use_cnn=True)  # Using CNN model
                 if self.model is None:
                     return "Model error", 0.0
             
             # Convert the frame to PIL Image
             pil_image = Image.fromarray(cv2.cvtColor(eye_frame, cv2.COLOR_BGR2RGB))
             
+            # For CNN model, we need to use the correct image size (224x224)
+            # Resize image directly to 224x224 for CNN model
+            pil_image = pil_image.resize((224, 224))
+            
             # Apply transformations
-            img_tensor = transform(pil_image).unsqueeze(0)
+            if isinstance(self.model, EyeCNN):
+                img_tensor = cnn_transform(pil_image).unsqueeze(0)
+            else:
+                img_tensor = transform(pil_image).unsqueeze(0)
             
             # Make prediction
             with torch.no_grad():
@@ -179,6 +234,8 @@ class EyeTracker:
                 
         except Exception as e:
             debug_print(f"Error in predict_gaze: {str(e)}")
+            import traceback
+            debug_print(traceback.format_exc())
             return "Error", 0.0
     
     def get_test_frame(self):
@@ -256,13 +313,13 @@ class EyeTracker:
             cropped_frame = rotated_frame[y_min:y_max, x_min:x_max]
             resized_frame = cv2.resize(cropped_frame, WINDOW_SIZE)
             
-            # Draw landmarks
-            for (x, y) in eye_points_rotated:
-                if x_min <= x < x_max and y_min <= y < y_max:
-                    x_adj = int((x - x_min) * WINDOW_SIZE[0] / (x_max - x_min))
-                    y_adj = int((y - y_min) * WINDOW_SIZE[1] / (y_max - y_min))
-                    if 0 <= x_adj < WINDOW_SIZE[0] and 0 <= y_adj < WINDOW_SIZE[1]:
-                        cv2.circle(resized_frame, (x_adj, y_adj), 2, (0, 0, 255), -1)
+            # # Draw landmarks
+            # for (x, y) in eye_points_rotated:
+            #     if x_min <= x < x_max and y_min <= y < y_max:
+            #         x_adj = int((x - x_min) * WINDOW_SIZE[0] / (x_max - x_min))
+            #         y_adj = int((y - y_min) * WINDOW_SIZE[1] / (y_max - y_min))
+            #         if 0 <= x_adj < WINDOW_SIZE[0] and 0 <= y_adj < WINDOW_SIZE[1]:
+            #             cv2.circle(resized_frame, (x_adj, y_adj), 2, (0, 0, 255), -1)
             
             # Predict gaze
             predicted_gaze, confidence = self.predict_gaze(resized_frame)
