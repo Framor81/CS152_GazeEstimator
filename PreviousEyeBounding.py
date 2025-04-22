@@ -70,6 +70,41 @@ def calculate_fixed_bounding_box(center, frame_shape, window_size):
     y_max = int(min(frame_shape[0], y_center + half_height))
     return x_min, y_min, x_max, y_max
 
+def process_frame(frame, detector, predictor):
+    """
+    Process a BGR frame (from webcam or WebRTC) and return the cropped eye region.
+    Returns the input frame and the cropped eye region (both in BGR).
+    """
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    dets = detector(gray)
+
+    if len(dets) == 0:
+        return frame, np.zeros((WINDOW_SIZE[1], WINDOW_SIZE[0], 3), dtype=np.uint8)
+
+    for d in dets:
+        try:
+            left_eye_points, left_eye_center = facial_landmarks(predictor, gray, d, 36, 42)
+            right_eye_points, right_eye_center = facial_landmarks(predictor, gray, d, 42, 48)
+
+            angle, eyes_center = eye_orientation(left_eye_center, right_eye_center)
+            rotated_frame, gray_rotated, dets_rotated = orient_eyes(frame, detector, eyes_center, angle)
+
+            for d_rotated in dets_rotated:
+                eye_points_rotated, _ = facial_landmarks(predictor, gray_rotated, d_rotated, 36, 48)
+                x_min, y_min, x_max, y_max = calculate_fixed_bounding_box(
+                    eyes_center, rotated_frame.shape, WINDOW_SIZE
+                )
+                cropped_frame = rotated_frame[y_min:y_max, x_min:x_max]
+                resized_frame = cv2.resize(cropped_frame, WINDOW_SIZE)
+                draw_landmarks(resized_frame, eye_points_rotated)
+                return frame, resized_frame
+        except Exception as e:
+            print(f"[process_frame error]: {e}")
+            continue
+
+    return frame, np.zeros((WINDOW_SIZE[1], WINDOW_SIZE[0], 3), dtype=np.uint8)
+
+
 def main():
     try:
         detector, predictor, cap = create_cam()
