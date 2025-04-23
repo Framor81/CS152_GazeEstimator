@@ -62,8 +62,18 @@ As shown above, the confusion matrix reveals that the most common misclassificat
 
 Despite strong overall performance, our model exhibited notable disparities in accuracy when evaluated on individuals from certain ethnic backgrounds. During testing, we observed that the model underperformed significantly for users with specific racial features, such as monolids or darker skin tones. This suggests that the datasets used for training may lack sufficient diversity, leading to biased performance that favors certain demographic groups over others. These disparities highlight a critical limitation in our model’s generalizability and underscore the need for more inclusive data collection practices moving forward.
 
+In creating the gradio interface, we learned through a lot of challenges of trying to create seamless livefeeds and how to properly implement the javascript functions to make it work. We tried to use gradio's webstream object to process the frames but it was not working as we expected. We had to pivot to utiilzing javascript functions to make the webstream work and how to properly implement the start/stop button to trigger the javascript function to process images of the webcam frequently enough to simulate a webcam feed. We also learned how to properly implement frame image processing techniques to make it work with the webcam image such as properly bounding our eyes and making sure that the images were properly rotated and cropped to be able to classify them correctly. Other challenges we overcame is properly loading and configuring the gradio to take in two separate CNN models, trying to run it on cpu vs cuda, and currently, connecting it to the robot itself.
+
 ## Conclusion
 Robo-Vision represents a significant advancement in the integration of neural networks and robotics. By accurately classifying gaze and translating it into robotic actions, the system demonstrates both technical excellence and adherence to ethical standards. Future work will focus on enhancing the model's generalization capabilities and exploring its application in diverse domains, such as assistive technologies and human-computer interaction.
+
+# Reflection 
+
+In the future, we believe it’s important to make an earlier decision about whether a particular user interface is the best choice for our application. We found that Gradio wasn’t necessarily the best option, as it doesn't support multiple live image feeds and introduces noticeable lag when applying the transformations needed to prepare images for our model. This slowed down our real-time classification and reduced overall responsiveness.
+
+We also think that getting the robot working much earlier in the process would have made testing significantly easier. Being able to send directions across devices and see the robot respond in real time would have helped us debug and refine our system more effectively.
+
+To continue this work, we would move away from Gradio and instead run the application directly on the user’s computer. This would allow all processing to happen locally, reducing lag and improving performance. We would also build more advanced robot scripts to support more complex movement based on the six classifications. Lastly, we would expand the dataset to be more inclusive to reduce bias and improve accuracy across a broader range of users.
 
 ## Future Direction and Work / Before Final Submission
 
