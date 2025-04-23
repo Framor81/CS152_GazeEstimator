@@ -116,35 +116,12 @@ def main():
                 break
 
             frame = cv2.flip(frame, 1)
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            dets = detector(gray)
 
-            for d in dets:
-                # Detect eyes and centers
-                left_eye_points, left_eye_center = facial_landmarks(predictor, gray, d, 36, 42)
-                right_eye_points, right_eye_center = facial_landmarks(predictor, gray, d, 42, 48)
+            # Use the new modular function
+            _, eye_region = process_frame(frame, detector, predictor)
 
-                # Calculate rotation
-                angle, eyes_center = eye_orientation(left_eye_center, right_eye_center)
-
-                # Rotate frame based on eyes
-                rotated_frame, gray_rotated, dets_rotated = orient_eyes(frame, detector, eyes_center, angle)
-
-                for d_rotated in dets_rotated:
-                    eye_points_rotated, _ = facial_landmarks(predictor, gray_rotated, d_rotated, 36, 48)
-
-                    # Crop to fixed bounding box around eyes
-                    x_min, y_min, x_max, y_max = calculate_fixed_bounding_box(eyes_center, rotated_frame.shape, WINDOW_SIZE)
-                    cropped_frame = rotated_frame[y_min:y_max, x_min:x_max]
-
-                    # Resize for display
-                    resized_frame = cv2.resize(cropped_frame, WINDOW_SIZE)
-
-                    # Optional: draw landmarks
-                    draw_landmarks(resized_frame, eye_points_rotated)
-
-                    # Show the eye region
-                    cv2.imshow('Eyes', resized_frame)
+            # Display the cropped eye region
+            cv2.imshow('Eyes', eye_region)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
@@ -152,6 +129,7 @@ def main():
     finally:
         cap.release()
         cv2.destroyAllWindows()
+
 
 if __name__ == "__main__":
     main()

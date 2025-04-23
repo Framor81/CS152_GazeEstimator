@@ -1,32 +1,48 @@
 import cv2
+import dlib
 import gradio as gr
 import numpy as np
 from gradio_webrtc import WebRTC
 
+from PreviousEyeBounding import create_cam, process_frame
 
-def process_webcam_frame(frame):
+# Initialize dlib models
+detector = dlib.get_frontal_face_detector()
+predictor = dlib.shape_predictor(r'shape_predictor_68_face_landmarks.dat')
+
+# Frame buffer counter
+frame_counter = 0
+BUFFER_SIZE = 4  # Process every 4th frame
+
+def process_webcam_frame(frame, record):
     """
     Process each frame from the webcam
     frame: RGB image from browser webcam
+    record: boolean indicating if recording is enabled
     returns: RGB image for display
     """
+    global frame_counter
+    
     if frame is None:
         return None
     
     try:
         # Convert from RGB to BGR for OpenCV processing
-        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+        frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
         
-        # Add your processing here
-        # For example:
-        # - Face detection
-        # - Eye tracking
-        # - Image transformations
-        
-        # Convert back to RGB for display
-        return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        if record:
+            # Only process every 4th frame
+            frame_counter = (frame_counter + 1) % BUFFER_SIZE
+            if frame_counter == 0:
+                _, eye_region = process_frame(frame_bgr, detector, predictor)
+                return cv2.cvtColor(eye_region, cv2.COLOR_BGR2RGB)
+            else:
+                # Return the last processed frame
+                return cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
+        else:
+            return cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
     except Exception as e:
-        print(f"Error processing frame: {str(e)}")
+        print(f"Error in webcam processor: {str(e)}")
         return None
 
 # WebRTC configuration
@@ -38,25 +54,43 @@ rtc_configuration = {
     ]
 }
 
-# Define the display size
-DISPLAY_SIZE = (320, 240)  # Smaller size for the display
+# Define the display sizes
+NORMAL_SIZE = (520, 480)  # Normal size
+RECORDING_SIZE = (600, 300)  # Size when recording
 
 # Create the interface
 with gr.Blocks() as demo:
     gr.Markdown("# Webcam Stream Demo")
     
-    # WebRTC component with fixed size
+    # Recording toggle
+    record = gr.Checkbox(label="Record/Process Frames")
+    
+    # WebRTC component with dynamic size
     webcam = WebRTC(
         label="Webcam Feed",
         rtc_configuration=rtc_configuration,
-        width=DISPLAY_SIZE[0],
-        height=DISPLAY_SIZE[1]
+        width=NORMAL_SIZE[0],
+        height=NORMAL_SIZE[1]
     )
     
-    # Set up the streaming
+    # Function to update size based on recording state
+    def update_size(record_state):
+        if record_state:
+            return {"width": RECORDING_SIZE[0], "height": RECORDING_SIZE[1]}
+        else:
+            return {"width": NORMAL_SIZE[0], "height": NORMAL_SIZE[1]}
+    
+    # Set up the streaming and size updates
     webcam.stream(
         fn=process_webcam_frame,
-        inputs=[webcam],
+        inputs=[webcam, record],
+        outputs=[webcam]
+    )
+    
+    # Update size when recording state changes
+    record.change(
+        fn=update_size,
+        inputs=[record],
         outputs=[webcam]
     )
 
