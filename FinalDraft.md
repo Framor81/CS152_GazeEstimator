@@ -26,7 +26,7 @@ Finally, transparency in deployment is critical to building trust for technology
 Our goal is not only to develop an effective solution but to do so in a way that is ethical, inclusive, and beneficial to those who need it most.
  
 ## Methods
-Our research began by identifying the datasets we would use to train our model. We selected two publicly available datasets: the Mendeley Eye-Tracker dataset and the MRL Eye dataset. The Mendeley dataset contains 7,500 evenly distributed images labeled according to five gaze directions—left, right, up, down, and straight—captured using standard camera equipment which can be found [here](https://www.kaggle.com/datasets/imadeddinedjerarda/mrl-eye-dataset). The MRL Eye dataset, found [here](https://www.kaggle.com/datasets/serenaraju/yawn-eye-dataset-new), focuses specifically on differentiating between open and closed eyes, making it particularly useful for blink detection. Together, these datasets allowed us to build and train our neural network without the need for complex preprocessing, while ensuring a reasonable level of diversity in eye shape, lighting, and head orientation. In addition to these resources, we created a Google Form to collect custom images from peers, asking for six images per category: looking up, down, left, right, forward, and eyes closed. This would not only expand our dataset but address some bias from the people the data were collected from.
+We began by identifying the datasets we planned to use to train our models. We selected two publicly available datasets: the Mendeley Eye-Tracker dataset and the MRL Eye dataset. The Mendeley dataset contains 7,500 evenly distributed images labeled according to five gaze directions—left, right, up, down, and straight—captured using standard camera equipment which can be found [here](https://www.kaggle.com/datasets/imadeddinedjerarda/mrl-eye-dataset). The MRL Eye dataset, found [here](https://www.kaggle.com/datasets/serenaraju/yawn-eye-dataset-new), focuses specifically on differentiating between open and closed eyes, making it particularly useful for blink detection. Together, these datasets allowed us to build and train our neural network without the need for complex preprocessing, while ensuring a reasonable level of diversity in eye shape, lighting, and head orientation. In addition to these resources, we created a Google Form to collect custom images from peers, asking for six images per category: looking up, down, left, right, forward, and eyes closed. This would not only expand our dataset but address some bias from the people the data were collected from.
 
 To ensure consistent input during real-time inference, we implemented an eye-bounding script from Francisco's 2024 SURP project called *Eyes In Motion*. This script uses dlib’s pretrained facial landmark detection model to identify and extract the eye regions based on specific landmark points. While the dlib model does not support gaze classification, it effectively localizes key facial features. Our script isolates the eye region and applies a series of linear transformations to normalize orientation, helping to standardize the appearance of all eye images prior to classification.
 
@@ -68,26 +68,6 @@ As shown above, the confusion matrix reveals that the most common misclassificat
 
 Despite strong overall performance, our model exhibited notable disparities in accuracy when evaluated on individuals from certain ethnic backgrounds. During testing, we observed that the model underperformed significantly for users with specific racial features, such as monolids or darker skin tones. This suggests that the datasets used for training may lack sufficient diversity, leading to biased performance that favors certain demographic groups over others. These disparities highlight a critical limitation in our model’s generalizability and underscore the need for more inclusive data collection practices moving forward.
 
-Firstly, we examined the training and validation loss for our Swin Transformer model.  
-![Loss and Validation](Images/ValidLoss.png)  
-As seen in the image above, our training loss initially started quite high; however, as training progressed, both the training and validation loss steadily decreased to below 0.5. Notably, the validation loss remained low without any significant increase in later epochs, suggesting that the model successfully avoided overfitting.
-
-Next, we evaluated the model's classification accuracy. Overall, the Swin Transformer achieved approximately 95% accuracy across all gaze categories. The per-class accuracy was as follows:  
-- *Closed*: 80.9%  
-- *Down*: 97.9%  
-- *Left*: 96.4%  
-- *Right*: 89.1%  
-- *Straight*: 92.1%  
-- *Up*: 98.7%  
-
-![Accuracy](Images/Accuracy.png)  
-These results indicate strong performance across most classes, with slightly lower accuracy in the "closed" and "right" categories. This discrepancy may be due to the visual similarity between closed eyes and downward gaze, which was further examined using the confusion matrix.
-
-![Confusion Matrix](Images/ConfusionMatrix.png)  
-As shown above, the confusion matrix reveals that the most common misclassifications occurred between the “closed” and “down” classes. This likely stems from the inherent visual similarity between eyes that are fully closed and those that are partially visible while looking downward. Regardkles though, the model demonstrated a strong ability across the remaining gaze directions.
-
-Despite strong overall performance, our model exhibited notable disparities in accuracy when evaluated on individuals from certain ethnic backgrounds. During testing, we observed that the model underperformed significantly for users with specific racial features, such as monolids or darker skin tones. This suggests that the datasets used for training may lack sufficient diversity, leading to biased performance that favors certain demographic groups over others. These disparities highlight a critical limitation in our model’s generalizability and underscore the need for more inclusive data collection practices moving forward.
-
 In creating the gradio interface, we learned through a lot of challenges of trying to create seamless livefeeds and how to properly implement the javascript functions to make it work. We tried to use gradio's webstream object to process the frames but it was not working as we expected. We had to pivot to utiilzing javascript functions to make the webstream work and how to properly implement the start/stop button to trigger the javascript function to process images of the webcam frequently enough to simulate a webcam feed. We also learned how to properly implement frame image processing techniques to make it work with the webcam image such as properly bounding our eyes and making sure that the images were properly rotated and cropped to be able to classify them correctly. Other challenges we overcame is properly loading and configuring the gradio to take in two separate CNN models, trying to run it on cpu vs cuda, and currently, connecting it to the robot itself.
 
 
@@ -96,6 +76,20 @@ Our initial CNN did not include a step to apply transformations to the images. T
 
 ## Conclusion
 Robo-Vision represents a significant advancement in the integration of neural networks and robotics. By accurately classifying gaze and translating it into robotic actions, the system demonstrates both technical excellence and adherence to ethical standards. Future work will focus on enhancing the model's generalization capabilities and exploring its application in diverse domains, such as assistive technologies and human-computer interaction.
+
+# Reflection 
+
+In the future, we believe it’s important to make an earlier decision about whether a particular user interface is the best choice for our application. We found that Gradio wasn’t necessarily the best option, as it doesn't support multiple live image feeds and introduces noticeable lag when applying the transformations needed to prepare images for our model. This slowed down our real-time classification and reduced overall responsiveness.
+
+We also think that getting the robot working much earlier in the process would have made testing significantly easier. Being able to send directions across devices and see the robot respond in real time would have helped us debug and refine our system more effectively.
+
+To continue this work, we would move away from Gradio and instead run the application directly on the user’s computer. This would allow all processing to happen locally, reducing lag and improving performance. We would also build more advanced robot scripts to support more complex movement based on the six classifications. Lastly, we would expand the dataset to be more inclusive to reduce bias and improve accuracy across a broader range of users.
+
+## Future Direction and Work / Before Final Submission
+
+* Work on a script for the robot to be controlled by the output classification from the eyes
+* Get the jetbot to be able to actually run the code
+* Get gradio to stream the jetbot live feed
 
 # References:
 [^1]: “Disability impacts all of us infographic,” Centers for Disease Control and Prevention, https://www.cdc.gov/disability-and-health/articles-documents/disability-impacts-all-of-us-infographic.html?CDC_AAref_Val=https%3A%2F%2Fwww.cdc.gov%2Fncbddd%2Fdisabilityandhealth%2Finfographic-disability-impacts-all.html (accessed Mar. 4, 2025). 
