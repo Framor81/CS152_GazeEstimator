@@ -42,9 +42,15 @@ Our research aims to develop an affordable and accurate gaze estimator using neu
 
 6. Creating the model itself from our Swin class after was not that much harder it was simply calling and instantiating an object of that class  and specifying our layers and number of classes.
 
-7. I kept running into memory errors for the GPU so I had to reduce the batch size from 5000 to 500 and then even then it was still too big so I had to change it to 128. The accuracy did get a bit worse though. Results were really good with around overall 95% accuracy with the most confusion coming from closed eyes.
+7. Francisco kept running into memory errors for the GPU so I had to reduce the batch size from 5000 to 500 and then even then it was still too big so I had to change it to 128. The accuracy did get a bit worse though. Results were really good with around overall 95% accuracy with the most confusion coming from closed eyes.
 
 8. Haram continued to work on the gradio interface and was able to get it to work with the webcam feed by fixing a couple of bugs how the frames were being processed. He also added a few extra features like a button to take a picture of the user's eye with red landmarks around it to ensure that the script is working accurately.
+
+9. Francisco started using the jetbot however constant issues kept arising. One of the main issues was that the docker image files did not want to build correctlyt. The first issue was the base_image_version variable wouldn't be correctly updated but that was fixed with a sudo export and the new base_image howwever, even after that it was still not working. I realized I hadn't built the docker images correctlyas base was causing errors. I tried so hard to fix this and eventually started chanigng the docker file itself however the public key for kitware was not being recognized.  As a final resort, I decided to reflash the SD Card and reattempt setting up jetbot. I flashed the SD card with SD Card Formatter and Etcher with the correct image file from nvidia. I then reset up wifi pretty easily on the jetbot and then adding the public key was easy to base_image as I only had to specify the correct base image version and then run a command like
+
+- Helpful tutorial: https://chrisjean.com/fix-apt-get-update-the-following-signatures-couldnt-be-verified-because-the-public-key-is-not-available/ 
+
+
 
 
 
