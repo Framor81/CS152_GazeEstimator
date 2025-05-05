@@ -487,7 +487,7 @@ if __name__ == "__main__":
         
         # Launch with queue
         demo.queue()
-        demo.launch(debug=True)
+        demo.launch(debug=True, share=True)
         debug_print("App launched successfully")
     except Exception as e:
         debug_print(f"Error launching app: {str(e)}")
