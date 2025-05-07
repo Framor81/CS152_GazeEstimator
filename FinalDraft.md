@@ -97,11 +97,9 @@ We also think that getting the robot working much earlier in the process would h
 
 To continue this work, we would move away from Gradio and instead run the application directly on the user’s computer. This would allow all processing to happen locally, reducing lag and improving performance. We would also build more advanced robot scripts to support more complex movement based on the six classifications. Lastly, we would expand the dataset to be more inclusive to reduce bias and improve accuracy across a broader range of users.
 
-## Future Direction and Work / Before Final Submission
+## Future Direction and Work
 
-* Work on a script for the robot to be controlled by the output classification from the eyes
-* Get the jetbot to be able to actually run the code
-* Get gradio to stream the jetbot live feed
+Moving forward, we aim to implement a control script that allows the JetBot to respond dynamically to gaze-based classifications, enabling real-time navigation and interaction. Although our progress was hindered by shared usage of the JetBot by another team and persistent dependency issues, we remain committed to overcoming these challenges. Our next steps involve deploying the script onto the JetBot, ensuring smooth operation, and integrating Gradio for live video streaming. These advancements will pave the way for seamless robotic control through intuitive, gaze-driven commands.
 
 # References:
 [^1]: “Disability impacts all of us infographic,” Centers for Disease Control and Prevention, https://www.cdc.gov/disability-and-health/articles-documents/disability-impacts-all-of-us-infographic.html?CDC_AAref_Val=https%3A%2F%2Fwww.cdc.gov%2Fncbddd%2Fdisabilityandhealth%2Finfographic-disability-impacts-all.html (accessed Mar. 4, 2025). 
