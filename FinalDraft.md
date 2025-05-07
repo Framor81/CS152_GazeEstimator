@@ -4,7 +4,9 @@
 
 Approximately 12.2% of Americans experience mobility disabilities, often requiring lifelong assistance [^1]. These individuals face significant challenges in maintaining independence and autonomy, frequently relying on assistive technologies to regain control over their environment. However, many existing technologies, such as joystick-controlled wheelchairs or voice-command systems, are limited for individuals with restricted dexterity [^2].
 
-<div align="center">![Eyetracking Technology examples](Images/eyetrack.jpg)</div>
+<div style="display: flex; justify-content: center; align-items: center;">
+    <img src="Images/eyetrack.jpg" width="100%">
+</div>
 
 Eye tracking is an emerging technology has became popular due to its abiltity to monitor and record where a person's gaze is directed, allowing researchers to analyze visual attention patterns and interactions. It has helped provide insights into human perception and behavior through specialized hardware/software that tracks eye movements and can used to provide accessbility to those in need. Eye tracking presents a promising alternative, enabling individuals to navigate and interact with their surroundings without the need for external limb movement. However, current solutions often rely on overly expensive commercial eye-trackers, infrared cameras, or high-quality images which are inaccessible to many users [^5]. We believe that Convolutional Neural Networks (CNNs) offer an opportunity to enhance affordability and accessibility by utilizing computer vision techniques for gaze estimation. CNN-based methods have already shown great adaptability to variations in lighting and head poses, which makes them suitable for real-world applications. Additionaly, using CNNs for gaze tracking eliminates the need for extensive user calibration, further increasing its accesibility [^3]. Recent works show that deep learning methods can improve gaze estimation accuracy, even in challenging conditions [^4]. Nonetheless, CNN based methods can lose important spatial information through pooling layers, limiting their ability to capture both local and global eye features. This has motivated researchers to investigate new architectures that preserve such details. In particular the Swin Transformer, has shown powerful modeling capabilities while keeping computational complexity lower with a window-based self-attention [^6]. By integrating innovative approaches like this sliding window-based attention mechanism, we could enhance the adaptability and precision of gaze-based control systems.
 
@@ -46,11 +48,15 @@ For the gradio interface, we wanted a simple way for users to be able to control
 
 THe Gradio interface displays a clean, organized two-column layout with clear user instructions, a primary video display showing processed eye regions with overlay information, and real-time gaze predictions with confidence scores. We designed it so users could easily control the system with a simple start/stop camera button, while status indicators showed the current system state. Additonally, we included robust error handling and a comprehensive debug system using debug_print statements. 
 
-<div align="center">![Gradio Interface](Images/gradio.png)</div>
+<div style="display: flex; justify-content: center; align-items: center;">
+    <img src="Images/gradio.png" width="100%">
+</div>
 
 In the final stages of the project, we worked on deploying the model to a JetBot robot using the SparkFun Qwiic Motor Driver. This phase was met with persistent issues in building the required Docker image. One major challenge involved the `base_image_version` variable not updating correctly, which we initially fixed by using`sudo export`. However, further errors kept popping up, particularly wRith public key verification for Kitware dependencies. We attempted to resolve these issues by editing the Dockerfile and manually importing the necessary keys, but these fixes were not sufficient. As a last resort, we decided to reflash the JetBot’s SD card using SD Card Formatter and Etcher with the official NVIDIA image. After reestablishing Wi-Fi connectivity, we were able to configure the base image version correctly and complete the Docker build process by manually specifying and verifying the required public keys. This successful reinstallation has yet to lead to a working docker image for easy coding.
 
-<div align="center">![Jetbot](Images/Jetbot.jpg)</div>
+<div style="display: flex; justify-content: center; align-items: center;">
+    <img src="Images/Jetbot.jpg" width="100%">
+</div>
 
 ## Discussion and Results
 
