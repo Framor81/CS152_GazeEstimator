@@ -1,5 +1,8 @@
 # Robo-Vision: Final Draft
 
+## Abstract
+Over 12% of Americans are impacted by mobility impairments and face barriers in using conventional assistive technologies because of their limited dexterity. Eye-tracking technology is promising in helping overcome these limitations, but currently available technologies can impose an additional financial burden. This project introduces a low-cost, webcam-based eye-tracking system that enables hands-free control of a robot using gaze direction. Using publicly available datasets and collected images, we trained two deep learning models, Convolutional Neural Networks (CNNs) and the Swin Transformer, capable of classifying six gaze categories: left, right, up, down, straight, and closed. The classifications are done using standard camera input without the need for expensive hardware or extensive calibration. The models were then integrated into a real-time Gradio web interface that processes webcam input, detects facial landmarks using dlib, isolates the eye region, and displays the processed eye images along with the predicted gaze direction. The Swin Transformer achieved an overall accuracy of 95%, with slight performance drops in the "closed" and "right" classes, and the CNN displayed a similar overall accuracy of 96%. 
+
 ## Introduction
 
 Approximately 12.2% of Americans experience mobility disabilities, often requiring lifelong assistance [^1]. These individuals face significant challenges in maintaining independence and autonomy, frequently relying on assistive technologies to regain control over their environment. However, many existing technologies, such as joystick-controlled wheelchairs or voice-command systems, are limited for individuals with restricted dexterity [^2].
