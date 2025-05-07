@@ -1,15 +1,19 @@
-import gradio as gr
-import cv2
-import numpy as np
-import dlib
-from PreviousEyeBounding import facial_landmarks, eye_orientation, orient_eyes, calculate_fixed_bounding_box
-import time
 import os
+import time
+
+import cv2
+import dlib
+import gradio as gr
+import numpy as np
 import torch
-from swin_model import Swin
+import torch.nn as nn
 import torchvision.transforms as T
 from PIL import Image
-import torch.nn as nn
+
+from PreviousEyeBounding import (calculate_fixed_bounding_box, eye_orientation,
+                                 facial_landmarks, orient_eyes)
+from swin_model import Swin
+
 
 class EyeCNN(nn.Module):
     def __init__(self, num_classes=5):
@@ -44,7 +48,7 @@ class EyeCNN(nn.Module):
         return self.classifier(x)
 
 # Constants
-WINDOW_SIZE = (200, 100)
+WINDOW_SIZE = (100, 50)
 DIRECTIONS = """
 Instructions:
 1. Position your face in front of the camera
@@ -285,41 +289,24 @@ class EyeTracker:
                 )
                 debug_print("Using artificial face region")
             
-            # Detect eye landmarks
+            # Detect left eye landmarks only
             left_eye_points, left_eye_center = facial_landmarks(self.predictor, gray, rect, 36, 42)
-            right_eye_points, right_eye_center = facial_landmarks(self.predictor, gray, rect, 42, 48)
             
-            # Calculate orientation
-            angle, eyes_center = eye_orientation(left_eye_center, right_eye_center)
-            
-            # Rotate frame
-            rotated_frame, gray_rotated, _ = orient_eyes(frame, self.detector, eyes_center, angle)
-            
-            # Get eye landmarks in rotated frame
-            left_eye_points_rotated, _ = facial_landmarks(self.predictor, gray_rotated, rect, 36, 42)
-            right_eye_points_rotated, _ = facial_landmarks(self.predictor, gray_rotated, rect, 42, 48)
-            eye_points_rotated = np.vstack((left_eye_points_rotated, right_eye_points_rotated))
-            
-            # Crop to eyes region
-            x_min, y_min, x_max, y_max = calculate_fixed_bounding_box(eyes_center, rotated_frame.shape, WINDOW_SIZE)
+            # Crop to left eye region
+            x_min, y_min, x_max, y_max = calculate_fixed_bounding_box(left_eye_center, frame.shape, WINDOW_SIZE)
             
             # Check for valid crop dimensions
             if x_min >= x_max or y_min >= y_max or x_min < 0 or y_min < 0 or \
-               x_max > rotated_frame.shape[1] or y_max > rotated_frame.shape[0]:
+               x_max > frame.shape[1] or y_max > frame.shape[0]:
                 debug_print("Invalid bounding box dimensions")
                 return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), "Unknown"
             
             # Crop and resize
-            cropped_frame = rotated_frame[y_min:y_max, x_min:x_max]
+            cropped_frame = frame[y_min:y_max, x_min:x_max]
             resized_frame = cv2.resize(cropped_frame, WINDOW_SIZE)
             
-            # # Draw landmarks
-            # for (x, y) in eye_points_rotated:
-            #     if x_min <= x < x_max and y_min <= y < y_max:
-            #         x_adj = int((x - x_min) * WINDOW_SIZE[0] / (x_max - x_min))
-            #         y_adj = int((y - y_min) * WINDOW_SIZE[1] / (y_max - y_min))
-            #         if 0 <= x_adj < WINDOW_SIZE[0] and 0 <= y_adj < WINDOW_SIZE[1]:
-            #             cv2.circle(resized_frame, (x_adj, y_adj), 2, (0, 0, 255), -1)
+            # Draw landmarks for left eye
+            # draw_landmarks(resized_frame, left_eye_points)
             
             # Predict gaze
             predicted_gaze, confidence = self.predict_gaze(resized_frame)
@@ -395,6 +382,66 @@ def process_webcam_frame():
         debug_print(f"Error in process_webcam_frame: {str(e)}")
         return tracker.get_test_frame(), "Error"
 
+def process_uploaded_image(image):
+    """Process an uploaded image using the Swin model"""
+    try:
+        if image is None:
+            return None, "No image uploaded"
+            
+        # Convert to numpy array if it's a PIL Image
+        if isinstance(image, Image.Image):
+            image = np.array(image)
+            
+        # Convert to BGR if it's RGB
+        if len(image.shape) == 3 and image.shape[2] == 3:
+            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+            
+        # Convert to grayscale
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        gray = cv2.equalizeHist(gray)
+        
+        # Detect faces
+        dets = tracker.detector(gray)
+        if len(dets) == 0:
+            return image, "No face detected in image"
+            
+        # Process first detected face
+        rect = dets[0]
+        
+        # Get left eye landmarks
+        left_eye_points, left_eye_center = facial_landmarks(tracker.predictor, gray, rect, 36, 42)
+        
+        # Calculate bounding box
+        x_min, y_min, x_max, y_max = calculate_fixed_bounding_box(left_eye_center, image.shape, WINDOW_SIZE)
+        
+        # Check for valid crop dimensions
+        if x_min >= x_max or y_min >= y_max or x_min < 0 or y_min < 0 or \
+           x_max > image.shape[1] or y_max > image.shape[0]:
+            return image, "Invalid eye region in image"
+        
+        # Crop and resize
+        cropped_frame = image[y_min:y_max, x_min:x_max]
+        resized_frame = cv2.resize(cropped_frame, WINDOW_SIZE)
+        
+        # Predict gaze
+        predicted_gaze, confidence = tracker.predict_gaze(resized_frame)
+        
+        # Draw results on original image
+        result_image = image.copy()
+        cv2.rectangle(result_image, (x_min, y_min), (x_max, y_max), (0, 255, 0), 2)
+        cv2.putText(result_image, f"Gaze: {predicted_gaze}", (x_min, y_min-10),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        cv2.putText(result_image, f"Conf: {confidence:.2f}", (x_min, y_min-30),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        
+        # Convert to RGB for display
+        result_image = cv2.cvtColor(result_image, cv2.COLOR_BGR2RGB)
+        return result_image, f"Predicted Gaze: {predicted_gaze} (Confidence: {confidence:.2f})"
+        
+    except Exception as e:
+        debug_print(f"Error processing uploaded image: {str(e)}")
+        return image, f"Error processing image: {str(e)}"
+
 # Create the Gradio interface
 with gr.Blocks(title="Eye Gaze Detection", theme=gr.themes.Base()) as demo:
     debug_print("Creating Gradio interface")
@@ -416,6 +463,16 @@ with gr.Blocks(title="Eye Gaze Detection", theme=gr.themes.Base()) as demo:
             # Add a refresh button that will be auto-clicked by JavaScript
             refresh_btn = gr.Button("Refresh", visible=False, elem_id="refresh-trigger")
     
+    # Add a new section for image upload
+    gr.Markdown("## Upload Image for Gaze Detection")
+    with gr.Row():
+        with gr.Column():
+            upload_image = gr.Image(label="Upload Image", type="pil")
+            upload_btn = gr.Button("Analyze Image", variant="primary")
+        with gr.Column():
+            result_image = gr.Image(label="Analysis Result")
+            result_text = gr.Textbox(label="Prediction Result")
+    
     # Connect the toggle button to the toggle_camera function
     toggle_btn.click(
         fn=toggle_camera,
@@ -428,6 +485,13 @@ with gr.Blocks(title="Eye Gaze Detection", theme=gr.themes.Base()) as demo:
         fn=process_webcam_frame,
         inputs=[],
         outputs=[eye_image, gaze_text]
+    )
+    
+    # Connect the upload button to process the uploaded image
+    upload_btn.click(
+        fn=process_uploaded_image,
+        inputs=[upload_image],
+        outputs=[result_image, result_text]
     )
     
     # Set up auto-refresh using JavaScript, but controlled by camera state

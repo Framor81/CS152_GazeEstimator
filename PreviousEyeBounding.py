@@ -5,7 +5,7 @@ import dlib
 import numpy as np
 
 # Define the fixed window size
-WINDOW_SIZE = (200, 100)
+WINDOW_SIZE = (125, 70)
 
 # open the camera
 def create_cam():
@@ -83,21 +83,22 @@ def process_frame(frame, detector, predictor):
 
     for d in dets:
         try:
+            # Only get left eye points and center
             left_eye_points, left_eye_center = facial_landmarks(predictor, gray, d, 36, 42)
-            right_eye_points, right_eye_center = facial_landmarks(predictor, gray, d, 42, 48)
-
-            angle, eyes_center = eye_orientation(left_eye_center, right_eye_center)
-            rotated_frame, gray_rotated, dets_rotated = orient_eyes(frame, detector, eyes_center, angle)
-
-            for d_rotated in dets_rotated:
-                eye_points_rotated, _ = facial_landmarks(predictor, gray_rotated, d_rotated, 36, 48)
-                x_min, y_min, x_max, y_max = calculate_fixed_bounding_box(
-                    eyes_center, rotated_frame.shape, WINDOW_SIZE
-                )
-                cropped_frame = rotated_frame[y_min:y_max, x_min:x_max]
-                resized_frame = cv2.resize(cropped_frame, WINDOW_SIZE)
-                draw_landmarks(resized_frame, eye_points_rotated)
-                return frame, resized_frame
+            
+            # Calculate bounding box centered on left eye
+            x_min, y_min, x_max, y_max = calculate_fixed_bounding_box(
+                left_eye_center, frame.shape, WINDOW_SIZE
+            )
+            
+            # Crop and resize the frame
+            cropped_frame = frame[y_min:y_max, x_min:x_max]
+            resized_frame = cv2.resize(cropped_frame, WINDOW_SIZE)
+            
+            # Draw landmarks for left eye only
+            draw_landmarks(resized_frame, left_eye_points)
+            return frame, resized_frame
+            
         except Exception as e:
             print(f"[process_frame error]: {e}")
             continue
